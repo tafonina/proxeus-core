@@ -130,7 +130,8 @@ Docker:Validate:
   stage: init
   interruptible: true
   image:
-    name: circleci/golang:1.13
+    name: circleci/go:1.13-node
+   # name: circleci/golang:1.13
 #    name: cimg/go:1.16-node
     entrypoint: [""]
   script:

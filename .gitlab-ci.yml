@@ -194,44 +194,44 @@ Docker:Push:
     - job: Docker:Build
       artifacts: true
 
-# Deploy:Docker:Compose:
-#   image: core.s-pro.io/devops-images/dd-container:${DD_CONTAINER_TAG}
-#   stage: deploy
-#   before_script:
-#     - export ECR_TOKEN=$(aws ecr get-login-password --region ${AWS_ECR_REGION})
-#   script:
-#     - chmod 600 $GITLAB_SSH
-#     - scp -i $GITLAB_SSH -o StrictHostKeyChecking=no -r ./.[!.]* ./* ${USER}@${SERVER_ADDR}:${CI_TARGET_DIR}
-#     - |-
-#       ssh -i $GITLAB_SSH -o StrictHostKeyChecking=no ${USER}@${SERVER_ADDR} \
-#         " cd $CI_TARGET_DIR
-#           rm -rf .git/
-#           echo "$ECR_TOKEN" | docker login -u AWS --password-stdin ${AWS_DOCKER_REGISTRY_URL}; \
-#           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc:/etc:ro spotify/docker-gc; \
-#           docker-compose -f docker-compose.yml -f docker-compose-cloud.override.yml pull; \
-#           docker-compose -f docker-compose.yml -f docker-compose-cloud.override.yml down --remove-orphans; \
-#           docker-compose -f docker-compose.yml -f docker-compose-cloud.override.yml up -d; \
-#           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc:/etc:ro spotify/docker-gc; \
-#           docker logout ${AWS_DOCKER_REGISTRY_URL}; \
-#           docker system prune -f
-#         "
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
-#       variables:
-#         ENV: 'DEV'
-#         SERVER_ADDR: $DEV_SERVER_ADDR
-#     - if: '$CI_COMMIT_BRANCH == $STAGE_BRANCH'
-#       variables:
-#         ENV: 'STAGE'
-#         SERVER_ADDR: $STAGE_SERVER_ADDR
-#     - if: '$CI_COMMIT_BRANCH == $PREPROD_BRANCH'
-#       variables:
-#         ENV: 'PREPROD'
-#         SERVER_ADDR: $PREPROD_SERVER_ADDR
-#     - if: '$CI_COMMIT_BRANCH == $PROD_BRANCH'
-#       variables:
-#         ENV: 'PROD'
-#         SERVER_ADDR: $PROD_SERVER_ADDR
+Deploy:Docker:Compose:
+  image: core.s-pro.io/devops-images/dd-container:${DD_CONTAINER_TAG}
+  stage: deploy
+  before_script:
+    - export ECR_TOKEN=$(aws ecr get-login-password --region ${AWS_ECR_REGION})
+  script:
+    - chmod 600 $GITLAB_SSH
+    - scp -i $GITLAB_SSH -o StrictHostKeyChecking=no -r ./.[!.]* ./* ${USER}@${SERVER_ADDR}:${CI_TARGET_DIR}
+    - |-
+      ssh -i $GITLAB_SSH -o StrictHostKeyChecking=no ${USER}@${SERVER_ADDR} \
+        " cd $CI_TARGET_DIR
+          rm -rf .git/
+          echo "$ECR_TOKEN" | docker login -u AWS --password-stdin ${AWS_DOCKER_REGISTRY_URL}; \
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc:/etc:ro spotify/docker-gc; \
+          docker-compose -f docker-compose.yml -f docker-compose-cloud.override.yml pull; \
+          docker-compose -f docker-compose.yml -f docker-compose-cloud.override.yml down --remove-orphans; \
+          docker-compose -f docker-compose.yml -f docker-compose-cloud.override.yml up -d; \
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc:/etc:ro spotify/docker-gc; \
+          docker logout ${AWS_DOCKER_REGISTRY_URL}; \
+          docker system prune -f
+        "
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
+      variables:
+        ENV: 'DEV'
+        SERVER_ADDR: $DEV_SERVER_ADDR
+    - if: '$CI_COMMIT_BRANCH == $STAGE_BRANCH'
+      variables:
+        ENV: 'STAGE'
+        SERVER_ADDR: $STAGE_SERVER_ADDR
+    - if: '$CI_COMMIT_BRANCH == $PREPROD_BRANCH'
+      variables:
+        ENV: 'PREPROD'
+        SERVER_ADDR: $PREPROD_SERVER_ADDR
+    - if: '$CI_COMMIT_BRANCH == $PROD_BRANCH'
+      variables:
+        ENV: 'PROD'
+        SERVER_ADDR: $PROD_SERVER_ADDR
 
 # Update:Prod:GitHub:
 #   image: core.s-pro.io/devops-images/dd-container:${DD_CONTAINER_TAG}

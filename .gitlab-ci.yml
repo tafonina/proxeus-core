@@ -99,13 +99,18 @@ Docker:Init:
   stage: init
   interruptible: true
   image:
-    name: node:10
+#    name: node:10
 #    name: circleci/golang:1.13
-#    name: cimg/go:1.16-node
+    name: cimg/go:1.13-node
     entrypoint: [""]
   script:
     - |-
         make ui
+        make init validate
+        make init test
+        make init server
+        make init server-docker
+
   rules:
     - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
       variables:
@@ -126,39 +131,39 @@ Docker:Init:
     paths:
     - ./builds/proxeusapp/core/ui
 
-Docker:Validate:
-  stage: init
-  interruptible: true
-  image:
-    name: cimg/go:1.13-node
-   # name: circleci/golang:1.13
-#    name: cimg/go:1.16-node
-    entrypoint: [""]
-  script:
-    - |-
-        make init validate
-        make init test
-        make init server
-        make init server-docker
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
-      variables:
-        ENV: 'dev'
-    - if: '$CI_COMMIT_BRANCH == $STAGE_BRANCH'
-      variables:
-        ENV: 'stage'
-    - if: '$CI_COMMIT_BRANCH == $PREPROD_BRANCH'
-      variables:
-        ENV: 'preprod'
-    - if: '$CI_COMMIT_BRANCH == $PROD_BRANCH'
-      variables:
-        ENV: 'prod'
-  needs:
-    - job: Docker:Init
-      artifacts: true
-  artifacts:
-    paths:
-    - ./artifacts/proxeus-docker
+# Docker:Validate:
+#   stage: init
+#   interruptible: true
+#   image:
+#     name: cimg/go:1.13-node
+#    # name: circleci/golang:1.13
+# #    name: cimg/go:1.16-node
+#     entrypoint: [""]
+#   script:
+#     - |-
+#         make init validate
+#         make init test
+#         make init server
+#         make init server-docker
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
+#       variables:
+#         ENV: 'dev'
+#     - if: '$CI_COMMIT_BRANCH == $STAGE_BRANCH'
+#       variables:
+#         ENV: 'stage'
+#     - if: '$CI_COMMIT_BRANCH == $PREPROD_BRANCH'
+#       variables:
+#         ENV: 'preprod'
+#     - if: '$CI_COMMIT_BRANCH == $PROD_BRANCH'
+#       variables:
+#         ENV: 'prod'
+#   needs:
+#     - job: Docker:Init
+#       artifacts: true
+#   artifacts:
+#     paths:
+#     - ./artifacts/proxeus-docker
 
 
 # Docker:Build:

@@ -19,3 +19,4 @@ test/e2e/cypress/videos/
 test/e2e/node_modules/
 
 .gitlab-ci.yml
+docker-compose.yml

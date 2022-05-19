@@ -27,9 +27,11 @@ variables:
   STAGE_BRANCH: stage
   PREPROD_BRANCH: preprod
   PROD_BRANCH: master
-  
+
+  version: 0.1.0
+
   DOCKERFILE_PATH: ./Dockerfile
-  VERSION_PATH: ./version.yml
+  VERSION_PATH: ./.gitlab-ci.yml
 
 Common:Env:
   stage: init

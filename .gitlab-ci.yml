@@ -20,14 +20,14 @@ variables:
   DD_CONTAINER_TAG: 0.6.0
   USER: root
   DEV_SERVER_ADDR: 164.92.189.73
-#   STAGE_SERVER_ADDR: 164.92.249.95
-#   PREPROD_SERVER_ADDR: 165.227.138.155
+  #   STAGE_SERVER_ADDR: 164.92.249.95
+  #   PREPROD_SERVER_ADDR: 165.227.138.155
   # PROD_SERVER_ADDR:
   DEV_BRANCH: develop
   STAGE_BRANCH: stage
   PREPROD_BRANCH: preprod
   PROD_BRANCH: master
-  
+
   DOCKERFILE_PATH: ./Dockerfile
   VERSION_PATH: ./version.yml
 
@@ -55,37 +55,37 @@ Common:Env:
     - echo "K8S_PROD_CONTEXT=$(kubectl config get-contexts | grep ${K8S_PROD_CLUSTER_CONTEXT} | awk '{print$1}')" >> common.env
     - echo "PROJECT_NAME=$(echo "$CI_PROJECT_NAME" | tr '[:upper:]' '[:lower:]'| sed "s/\//-/" | sed 's/[[:blank:]]*$//' | sed 's/\r$//' )" >> common.env
     - |-
-        if [ "$UMBRELLA_CHART_NAME" == "null" ]
-        then
-            echo "UMBRELLA_CHART_NAME=${NAMESPACE}" >> common.env
-        else
-            echo "UMBRELLA_CHART_NAME=${UMBRELLA_CHART_NAME}" >> common.env
-        fi
+      if [ "$UMBRELLA_CHART_NAME" == "null" ]
+      then
+          echo "UMBRELLA_CHART_NAME=${NAMESPACE}" >> common.env
+      else
+          echo "UMBRELLA_CHART_NAME=${UMBRELLA_CHART_NAME}" >> common.env
+      fi
     - |-
-        FILE=${VERSION_PATH}
-        if [ -f "$FILE" ];
-        then
-            VERSION_FILE=${VERSION_PATH}
-        else
-            VERSION_FILE="${CHART_DIR}/Chart.yaml"
-            CHART_NAME=$(yq eval .name "${VERSION_FILE}")
-            echo "CHART_NAME=${CHART_NAME}" >> common.env
-        fi
+      FILE=${VERSION_PATH}
+      if [ -f "$FILE" ];
+      then
+          VERSION_FILE=${VERSION_PATH}
+      else
+          VERSION_FILE="${CHART_DIR}/Chart.yaml"
+          CHART_NAME=$(yq eval .name "${VERSION_FILE}")
+          echo "CHART_NAME=${CHART_NAME}" >> common.env
+      fi
     - |-
-        if [ "$CI_PIPELINE_SOURCE" == "merge_request_event" ];
-        then
-          RC_SUFFIX=-rc.${CI_PIPELINE_ID}
-          OLD_TAG=$(yq eval .version "${VERSION_FILE}")
-          echo "IMAGE_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
-          echo "CHART_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
-          echo "OLD_TAG=${OLD_TAG}" >> common.env
-        else
-          RC_SUFFIX=-rc.${CI_PIPELINE_ID}
-          OLD_TAG=$(yq eval .version "${VERSION_FILE}")
-          echo "IMAGE_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
-          echo "CHART_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
-          echo "OLD_TAG=${OLD_TAG}" >> common.env
-        fi
+      if [ "$CI_PIPELINE_SOURCE" == "merge_request_event" ];
+      then
+        RC_SUFFIX=-rc.${CI_PIPELINE_ID}
+        OLD_TAG=$(yq eval .version "${VERSION_FILE}")
+        echo "IMAGE_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
+        echo "CHART_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
+        echo "OLD_TAG=${OLD_TAG}" >> common.env
+      else
+        RC_SUFFIX=-rc.${CI_PIPELINE_ID}
+        OLD_TAG=$(yq eval .version "${VERSION_FILE}")
+        echo "IMAGE_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
+        echo "CHART_TAG=${OLD_TAG}${RC_SUFFIX}" >> common.env
+        echo "OLD_TAG=${OLD_TAG}" >> common.env
+      fi
   artifacts:
     name: "EnvVars"
     reports:
@@ -101,11 +101,11 @@ Docker:Init:
     entrypoint: [""]
   script:
     - |-
-        make ui
-        make init validate
-        make init test
-        make init server
-        make init server-docker
+      make ui
+      make init validate
+      make init test
+      make init server
+      make init server-docker
   rules:
     - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
       variables:
@@ -124,7 +124,7 @@ Docker:Init:
       artifacts: true
   artifacts:
     paths:
-    - ./artifacts/proxeus-docker
+      - ./artifacts/proxeus-docker
 
 Docker:Build:
   stage: build
@@ -134,12 +134,12 @@ Docker:Build:
     entrypoint: [""]
   script:
     - |-
-            /kaniko/executor \
-            --context $CI_PROJECT_DIR \
-            --dockerfile $DOCKERFILE_PATH \
-            --no-push \
-            --destination ${AWS_DOCKER_REGISTRY_URL}\/${NAMESPACE}\/${ENV}\/${PROJECT_NAME}:latest \
-            --tarPath image.tar
+      /kaniko/executor \
+      --context $CI_PROJECT_DIR \
+      --dockerfile $DOCKERFILE_PATH \
+      --no-push \
+      --destination ${AWS_DOCKER_REGISTRY_URL}\/${NAMESPACE}\/${ENV}\/${PROJECT_NAME}:latest \
+      --tarPath image.tar
   rules:
     - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
       variables:
@@ -158,7 +158,7 @@ Docker:Build:
       artifacts: true
   artifacts:
     paths:
-    - image.tar
+      - image.tar
 
 Docker:Push:
   stage: push
@@ -168,8 +168,8 @@ Docker:Push:
     entrypoint: [""]
   script:
     - |-
-          aws ecr get-login-password --region us-east-1 | crane auth login -u AWS --password-stdin ${AWS_DOCKER_REGISTRY_URL}
-          crane push image.tar ${AWS_DOCKER_REGISTRY_URL}\/${NAMESPACE}\/${ENV}\/${PROJECT_NAME}:latest
+      aws ecr get-login-password --region us-east-1 | crane auth login -u AWS --password-stdin ${AWS_DOCKER_REGISTRY_URL}
+      crane push image.tar ${AWS_DOCKER_REGISTRY_URL}\/${NAMESPACE}\/${ENV}\/${PROJECT_NAME}:latest
   rules:
     - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'
       variables:
@@ -200,12 +200,15 @@ Deploy:Docker:Compose:
     - |-
       ssh -i $GITLAB_SSH -o StrictHostKeyChecking=no ${USER}@${SERVER_ADDR} \
         " cd $CI_TARGET_DIR
+          echo $CI_TARGET_DIR
+          env
+          pwd
           rm -rf .git/
           echo "$ECR_TOKEN" | docker login -u AWS --password-stdin ${AWS_DOCKER_REGISTRY_URL}; \
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc:/etc:ro spotify/docker-gc; \
-          docker-compose -f docker-compose-${DOCKER_COMPOSE_ENV}.yml -f docker-compose-cloud.override.yml pull; \
-          docker-compose -f docker-compose-${DOCKER_COMPOSE_ENV}.yml -f docker-compose-cloud.override.yml down --remove-orphans; \
-          docker-compose -f docker-compose-${DOCKER_COMPOSE_ENV}.yml -f docker-compose-cloud.override.yml up -d; \
+          docker-compose -f docker-compose-${DOCKER_COMPOSE_ENV}.yml -f docker-compose-cloud-${DOCKER_COMPOSE_ENV}.override.yml pull; \
+          docker-compose -f docker-compose-${DOCKER_COMPOSE_ENV}.yml -f docker-compose-cloud-${DOCKER_COMPOSE_ENV}.override.yml down --remove-orphans; \
+          docker-compose -f docker-compose-${DOCKER_COMPOSE_ENV}.yml -f docker-compose-cloud-${DOCKER_COMPOSE_ENV}.override.yml up -d; \
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc:/etc:ro spotify/docker-gc; \
           docker logout ${AWS_DOCKER_REGISTRY_URL}; \
           docker system prune -f
@@ -231,24 +234,3 @@ Deploy:Docker:Compose:
         ENV: 'PROD'
         DOCKER_COMPOSE_ENV: prod
         SERVER_ADDR: $PROD_SERVER_ADDR
-
-Update:Prod:GitHub:
-  image: 907208926079.dkr.ecr.us-east-1.amazonaws.com/devops-images/prod/dd-container:1.0.0
-  stage: update
-  needs:
-    - job: Common:Env
-      artifacts: true
-  script:
-    - git remote remove origin
-    - git remote add github https://burzhynskyi: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@github.com/burzhynskyi/proxeus-core
-    #- git checkout -b vmarchenko
-    - echo "docker-compose.yml" >> .gitignore
-    - echo "docker-compose-cloud.override.yml" >> .gitignore
-    - echo ".gitlab-ci.yml" >> .gitignore
-    - echo "version.yml" >> .gitignore
-#    - git push origin HEAD:master --force
-    - git push --mirror github
-#    - git push https://burzhynskyi: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@github.com/burzhynskyi/proxeus-core
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $PROD_BRANCH'
-      when: manual

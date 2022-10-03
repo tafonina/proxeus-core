@@ -7,7 +7,7 @@ networks:
 
 services:
   platform:
-    image: 907208926079.dkr.ecr.us-east-1.amazonaws.com/proxeusapp/dev/core:latest
+    image: 907208926079.dkr.ecr.us-east-1.amazonaws.com/proxeusapp/preprod/core:latest
     container_name: xes-platform
     depends_on:
       - document-service

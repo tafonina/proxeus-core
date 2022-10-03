@@ -53,7 +53,7 @@
     <spinner v-show="loaded !== true && error !== true" :margin="0" background="transparent" color="#333"
              cls="position-relative no-padding-top mt-0"/>
     <button v-show="loaded && error === false" class="btn btn-link p-0 border-0" @click.prevent="mainAction">
-      <pdf :src="getSrc" :key="pdfRenderKey" @loaded="pdfLoaded" @error="pdfError"/>
+      <pdf :src="getSrc" @loaded="pdfLoaded" @error="pdfError"/>
       <span class="filename d-inline-block t-ellipsis" v-if="filename"><small :title="filename">{{ filename }}</small></span>
     </button>
     <pdf-modal class="pdfwkaround" :src="getSrc" :mid="'modal' + _uid" ref="pdfMod" :filename="filename"
@@ -85,20 +85,12 @@ export default {
       loaded: false,
       error: false,
       lang: null,
-      showActions: false,
-      pdfRenderKey: 0
+      showActions: false
     }
   },
   computed: {
     getSrc () {
-      console.log('getSrc: ')
-      console.log('this.src: ', this.src)
-      console.log('dynamicDownloadSrc: ', this.dynamicDownloadSrc('pdf'))
-
-      const src = this.src ? this.src + '?format=pdf' : this.dynamicDownloadSrc('pdf')
-
-      console.log('src: ', src)
-      return src
+      return this.src ? this.src + '?format=pdf' : this.dynamicLangPreviewSrc
     },
     canDownload () {
       return !!this.src
@@ -135,9 +127,6 @@ export default {
       return this.dynamicDownloadSrc('pdf')
     }
   },
-  created () {
-    this.checkPdfLoaded()
-  },
   methods: {
     langAvailable (lang) {
       return this.app.isLangAvailable(lang)
@@ -155,8 +144,6 @@ export default {
       this.loaded = true
     },
     pdfError (doc) {
-      console.log('pdfError')
-      console.log(doc)
       this.loaded = true
       this.error = true
     },
@@ -191,14 +178,8 @@ export default {
       this.$nextTick(() => {
         this.$refs.pdfMod.load()
       })
-    },
-    checkPdfLoaded () {
-      setTimeout(() => {
-        console.log('checkPdfLoaded: ')
-        console.log(this.getSrc)
-        this.pdfRenderKey++
-      }, 6000)
     }
+
   }
 }
 </script>

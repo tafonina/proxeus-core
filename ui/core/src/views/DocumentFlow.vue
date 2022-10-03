@@ -1,136 +1,136 @@
 <template>
-<div class="document-view">
-  <vue-headful :title="$t('Flow title prefix','Proxeus - ')+(name || $t('Document title','Document'))"/>
-  <top-nav :returnToRoute="{name:'Documents'}" bg="#ffffff" :title="name" :sidebarToggler="false" class="border-bottom-0 bg-white">
-    <language-drop-down slot="buttons" style="margin-top: 3px;"/>
-  </top-nav>
-  <div class="container-fluid document-inner-view bg-light" v-if="status && name">
-    <div class="row h-100">
-      <div class="col-md-3 mt-3">
-        <ul class="nav mod_stepnav flex-column nav-pills">
-          <li v-for="(step, index) in status.steps" :key="index" class="nav-item">
+  <div class="document-view">
+    <vue-headful :title="$t('Flow title prefix','Proxeus - ')+(name || $t('Document title','Document'))"/>
+    <top-nav :returnToRoute="{name:'Documents'}" bg="#ffffff" :title="name" :sidebarToggler="false" class="border-bottom-0 bg-white">
+      <language-drop-down slot="buttons" style="margin-top: 3px;"/>
+    </top-nav>
+    <div class="container-fluid document-inner-view bg-light" v-if="status && name">
+      <div class="row h-100">
+        <div class="col-md-3 mt-3">
+          <ul class="nav mod_stepnav flex-column nav-pills">
+            <li v-for="(step, index) in status.steps" :key="index" class="nav-item">
             <span class="btn-link nav-link text-truncate"
                   :class="{active:index === status.steps.length - 1 && isConfirmationStep === false}">
               {{ step.name }}
             </span>
-          </li>
-          <li class="nav-item">
-            <span class="btn-link nav-link active text-truncate" v-if="isConfirmationStep">{{$t('Confirmation')}}</span>
-          </li>
-        </ul>
-      </div>
-      <div class="col-md-6 mt-3">
-        <div class="document-form card bg-transparent w-100 border-0" style="position:relative;">
-          <div v-show="loading" class="v-fade"
-               style="position:absolute;top:0;left:0;bottom:0;right:0;margin-top: 50px;">
-            <div>
-              <spinner background="transparent"/>
-            </div>
-            <div class="processing-hint">
-              {{$t('Document processing hint', 'Processing your request. This might take a while.')}}
+            </li>
+            <li class="nav-item">
+              <span class="btn-link nav-link active text-truncate" v-if="isConfirmationStep">{{$t('Confirmation')}}</span>
+            </li>
+          </ul>
+        </div>
+        <div class="col-md-6 mt-3">
+          <div class="document-form card bg-transparent w-100 border-0" style="position:relative;">
+            <div v-show="loading" class="v-fade"
+                 style="position:absolute;top:0;left:0;bottom:0;right:0;margin-top: 50px;">
+              <div>
+                <spinner background="transparent"/>
+              </div>
+              <div class="processing-hint">
+                {{$t('Document processing hint', 'Processing your request. This might take a while.')}}
 
-            </div>
-          </div>
-          <div><!--to prevent from flickering-->
-            <div class="card-header border-bottom-0" style="visibility: hidden;">
-              <h2 class="text-white my-0 py-0">A</h2>
-            </div>
-            <div class="card-body card-form-body bg-white border-0">
-            </div>
-          </div>
-          <div v-show="loading === false && isConfirmationStep === false" class="v-fade"
-               style="position:absolute;top:0;left:0;bottom:0;right:0;">
-            <div class="card-header border-bottom-0">
-              <h2 class="text-white my-0 py-0">{{ getCurrentName()}}</h2>
-            </div>
-            <div id="docForm" class="card-body card-form-body bg-white border-0">
-              <div class="form form-compiled" v-append="formSrc" @mounted="appended"
-                   v-show="isConfirmationStep === false"></div>
-            </div>
-          </div>
-
-          <div v-show="loading === false && isConfirmationStep" class="v-fade"
-               style="position:absolute;top:0;left:0;bottom:0;right:0;">
-            <div v-if="!isConnectedAccount" class="alert alert-warning mb-3" role="alert">
-              {{$t('Document register help', 'Make sure that you are logged into the correct account in MetaMask. The Document-Registration must be made from the ethereum-account that you have connected in your account settings. Switch Metamask account and make sure that you have set your ethereum address in your account account settings on the top right.')}}
-            </div>
-            <div class="card-header border-bottom-0">
-              <h2 class="text-white my-0 py-0">{{$t('Confirmation')}}</h2>
-            </div>
-            <div class="card-body card-form-body bg-white border-0">
-              <div class="last-step">
-                <form v-on:submit.prevent="confirm">
-                  <div class="mb-2" v-show="submitting === false && pricePerFile">
-                    <div class="easy-read">{{ pricePerFileFormatted }} per File.</div>
-                    <span class="light-text">(Ethereum transaction cost excluded)</span>
-                  </div>
-                  <div class="mb-2" v-show="submitting === false">
-                    <animated-input label="Additional Text data" :max="32" v-model="data"/>
-                    <span class="light-text">Information entered here will be publicly visible to anyone.</span>
-                  </div>
-                  <button type="submit"
-                          class="btn btn-primary"
-                          :disabled="submitting || !isConnectedAccount" v-show="submitting === false">Submit
-                  </button>
-                  <spinner background="transparent" style="position:relative;" :margin="60" v-if="submitting"></spinner>
-                  <div class="text-center">
-                    <transition name="fade" mode="out-in">
-                      <p class="text-primary px-5"
-                         v-if="approvingXES">Please confirm the release of XES from your wallet in MetaMask.</p>
-                      <p class="text-primary px-5"
-                         v-if="confirmingDocs">Please confirm the registration of your document on the blockchain in MetaMask.</p>
-                    </transition>
-                    <p class="light-text"
-                       v-show="submitting">If MetaMask doesn't pop up automatically, click on the MetaMask icon in the top right corner of your browser.</p>
-                  </div>
-                </form>
               </div>
             </div>
-          </div>
+            <div><!--to prevent from flickering-->
+              <div class="card-header border-bottom-0" style="visibility: hidden;">
+                <h2 class="text-white my-0 py-0">A</h2>
+              </div>
+              <div class="card-body card-form-body bg-white border-0">
+              </div>
+            </div>
+            <div v-show="loading === false && isConfirmationStep === false" class="v-fade"
+                 style="position:absolute;top:0;left:0;bottom:0;right:0;">
+              <div class="card-header border-bottom-0">
+                <h2 class="text-white my-0 py-0">{{ getCurrentName()}}</h2>
+              </div>
+              <div id="docForm" class="card-body card-form-body bg-white border-0">
+                <div class="form form-compiled" v-append="formSrc" @mounted="appended"
+                     v-show="isConfirmationStep === false"></div>
+              </div>
+            </div>
 
-          <div class="card-footer bg-primary d-flex flex-row">
-            <button type="submit" class="btn btn-primary border mr-auto" @click="previous"
-                    :disabled="loading"
-                    v-if="status.hasPrev && isConfirmationStep === false">
-              <i class="material-icons">chevron_left</i>
-            </button>
-            <button type="submit" class="btn btn-primary border mr-auto" @click="cancelConfirmationStep"
-                    :disabled="loading"
-                    v-else-if="isConfirmationStep === true && submitting === false">
-              <i class="material-icons">chevron_left</i>
-            </button>
+            <div v-show="loading === false && isConfirmationStep" class="v-fade"
+                 style="position:absolute;top:0;left:0;bottom:0;right:0;">
+              <div v-if="!isConnectedAccount" class="alert alert-warning mb-3" role="alert">
+                {{$t('Document register help', 'Make sure that you are logged into the correct account in MetaMask. The Document-Registration must be made from the ethereum-account that you have connected in your account settings. Switch Metamask account and make sure that you have set your ethereum address in your account account settings on the top right.')}}
+              </div>
+              <div class="card-header border-bottom-0">
+                <h2 class="text-white my-0 py-0">{{$t('Confirmation')}}</h2>
+              </div>
+              <div class="card-body card-form-body bg-white border-0">
+                <div class="last-step">
+                  <form v-on:submit.prevent="confirm">
+                    <div class="mb-2" v-show="submitting === false && pricePerFile">
+                      <div class="easy-read">{{ pricePerFileFormatted }} per File.</div>
+                      <span class="light-text">(Ethereum transaction cost excluded)</span>
+                    </div>
+                    <div class="mb-2" v-show="submitting === false">
+                      <animated-input label="Additional Text data" :max="32" v-model="data"/>
+                      <span class="light-text">Information entered here will be publicly visible to anyone.</span>
+                    </div>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            :disabled="submitting || !isConnectedAccount" v-show="submitting === false">Submit
+                    </button>
+                    <spinner background="transparent" style="position:relative;" :margin="60" v-if="submitting"></spinner>
+                    <div class="text-center">
+                      <transition name="fade" mode="out-in">
+                        <p class="text-primary px-5"
+                           v-if="approvingXES">Please confirm the release of XES from your wallet in MetaMask.</p>
+                        <p class="text-primary px-5"
+                           v-if="confirmingDocs">Please confirm the registration of your document on the blockchain in MetaMask.</p>
+                      </transition>
+                      <p class="light-text"
+                         v-show="submitting">If MetaMask doesn't pop up automatically, click on the MetaMask icon in the top right corner of your browser.</p>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
 
-            <button type="submit" class="btn btn-primary border ml-auto" @click="next"
-                    :disabled="loading"
-                    v-if="status.hasNext">
-              <i class="material-icons">chevron_right</i>
-            </button>
-            <button type="submit" class="btn btn-primary border ml-auto" @click="confirmationStep"
-                    :disabled="loading"
-                    v-else-if="status.hasNext === false && isConfirmationStep === false">
-              <i class="material-icons">chevron_right</i>
-            </button>
+            <div class="card-footer bg-primary d-flex flex-row">
+              <button type="submit" class="btn btn-primary border mr-auto" @click="previous"
+                      :disabled="loading"
+                      v-if="status.hasPrev && isConfirmationStep === false">
+                <i class="material-icons">chevron_left</i>
+              </button>
+              <button type="submit" class="btn btn-primary border mr-auto" @click="cancelConfirmationStep"
+                      :disabled="loading"
+                      v-else-if="isConfirmationStep === true && submitting === false">
+                <i class="material-icons">chevron_left</i>
+              </button>
+
+              <button type="submit" class="btn btn-primary border ml-auto" @click="next"
+                      :disabled="loading"
+                      v-if="status.hasNext">
+                <i class="material-icons">chevron_right</i>
+              </button>
+              <button type="submit" class="btn btn-primary border ml-auto" @click="confirmationStep"
+                      :disabled="loading"
+                      v-else-if="status.hasNext === false && isConfirmationStep === false">
+                <i class="material-icons">chevron_right</i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="col-md-3 mt-3 document-scroll-view" :class="{'has-pdf':documentPreviews != null}">
-        <template v-if="documentPreviews">
-          <div class="d-flex flex-row flex-wrap">
-            <template v-for="doc in documentPreviews">
-              <pdf-preview v-if="anyLangAvailable(doc)"
-                           :key="doc.id"
-                           :name="doc.name"
-                           :languages="doc.langs"
-                           :doc="doc" :wfId="id"
-                           :locale="locale"
-                           :langSelectorVisible="isConfirmationStep === false"/>
-            </template>
-          </div>
-        </template>
+        <div class="col-md-3 mt-3 document-scroll-view" :class="{'has-pdf':documentPreviews != null}">
+          <template v-if="documentPreviews">
+            <div class="d-flex flex-row flex-wrap">
+              <template v-for="doc in documentPreviews">
+                <pdf-preview v-if="anyLangAvailable(doc)"
+                             :key="doc.id"
+                             :name="doc.name"
+                             :languages="doc.langs"
+                             :doc="doc" :wfId="id"
+                             :locale="locale"
+                             :langSelectorVisible="isConfirmationStep === false"/>
+              </template>
+            </div>
+          </template>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -550,8 +550,6 @@ export default {
       }
     },
     handleDocumentResponse (response) {
-      console.log('handleDocumentResponse')
-      console.log(response)
       if (!response.data) {
         return
       }
@@ -638,147 +636,147 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  @import "../assets/styles/variables";
-  @import "~bootstrap/scss/mixins";
+@import "../assets/styles/variables";
+@import "~bootstrap/scss/mixins";
 
-  hr {
-    border-top: 1px solid rgb(6, 42, 133) !important;
-  }
+hr {
+  border-top: 1px solid rgb(6, 42, 133) !important;
+}
 
+.form-heading {
+  border-bottom: 1px solid #40e1d1;
+}
+
+.document-inner-view {
+  overflow: auto;
+  height: calc(100vh - 65px);
+}
+
+@media (max-width: 768px) {
   .form-heading {
-    border-bottom: 1px solid #40e1d1;
+    color: $primary;
   }
+}
 
-  .document-inner-view {
-    overflow: auto;
-    height: calc(100vh - 65px);
+.navbar-nav .ss-sel-main {
+  top: 4px;
+}
+
+.navbar-brand svg {
+  height: 50px;
+}
+
+.navbar {
+  .dropdown-menu {
+    right: 0;
+    left: auto;
   }
+}
 
-  @media (max-width: 768px) {
-    .form-heading {
-      color: $primary;
-    }
-  }
+::v-deep .navbar .dropdown .nav-link {
+  color: white !important;
+}
 
-  .navbar-nav .ss-sel-main {
-    top: 4px;
-  }
+.card {
+  border-radius: 0;
 
-  .navbar-brand svg {
-    height: 50px;
-  }
-
-  .navbar {
-    .dropdown-menu {
-      right: 0;
-      left: auto;
-    }
-  }
-
-  ::v-deep .navbar .dropdown .nav-link {
-    color: white !important;
-  }
-
-  .card {
+  .card-footer {
     border-radius: 0;
+    box-shadow: 0 -20px 20px -10px rgba(0, 0, 0, .1);
+    z-index: 9;
+    min-height: 64px;
+  }
+}
 
-    .card-footer {
-      border-radius: 0;
-      box-shadow: 0 -20px 20px -10px rgba(0, 0, 0, .1);
-      z-index: 9;
-      min-height: 64px;
-    }
+.document-scroll-view {
+  //height: calc(100vh - 68px) !important;
+  overflow-y: visible;
+  position: relative;
+}
+
+.card-form-body {
+  height: calc(100vh - 220px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 9px;
+    height: 9px;
   }
 
-  .document-scroll-view {
-    //height: calc(100vh - 68px) !important;
-    overflow-y: visible;
-    position: relative;
+  &::-webkit-scrollbar-thumb {
+    border-radius: 7px;
+    border: 1px solid white; /* Angleichen mit Hintergrundfarbe-nicht transparent! */
+    background-color: rgba(0, 0, 0, .5);
   }
 
-  .card-form-body {
-    height: calc(100vh - 220px);
-    overflow-y: auto;
-    overflow-x: hidden;
+}
 
-    &::-webkit-scrollbar {
-      -webkit-appearance: none;
-      width: 9px;
-      height: 9px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      border-radius: 7px;
-      border: 1px solid white; /* Angleichen mit Hintergrundfarbe-nicht transparent! */
-      background-color: rgba(0, 0, 0, .5);
-    }
-
+.document-form {
+  position: relative;
+  .card-header {
+    background-color:$primary;
   }
+  .processing-hint {
+    position: absolute;
+    margin: 180px auto;
+    width: 100%;
+    text-align: center;
+    color: $primary;
+  }
+}
 
-  .document-form {
-    position: relative;
-    .card-header {
-      background-color:$primary;
-    }
-    .processing-hint {
-      position: absolute;
-      margin: 180px auto;
-      width: 100%;
-      text-align: center;
+.paper-stack {
+  border: none;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); /* The top layer shadow */
+}
+
+.mod_stepnav {
+  .nav-link {
+    cursor: default;
+    color: $gray-500;
+    border-left: 4px solid transparent;
+
+    &.active {
+      font-weight: 500;
       color: $primary;
+      border-left: 4px solid $info;
+      background: transparent;
     }
   }
+}
 
-  .paper-stack {
-    border: none;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); /* The top layer shadow */
-  }
+.fade-enter-active {
+  transition: transform 0.5s, opacity 0.5s;
+}
 
-  .mod_stepnav {
-    .nav-link {
-      cursor: default;
-      color: $gray-500;
-      border-left: 4px solid transparent;
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
 
-      &.active {
-        font-weight: 500;
-        color: $primary;
-        border-left: 4px solid $info;
-        background: transparent;
-      }
-    }
-  }
+.fade-enter {
+  opacity: 0;
+  transform: translateY(-100%);
+}
 
-  .fade-enter-active {
-    transition: transform 0.5s, opacity 0.5s;
-  }
+.fade-enter-to, .fade-leave {
+  opacity: 1;
+  transform: translateY(0);
+}
 
-  .fade-leave-active {
-    transition: opacity 0.3s;
-  }
+.fade-leave-to {
+  opacity: 0;
+}
 
-  .fade-enter {
-    opacity: 0;
-    transform: translateY(-100%);
-  }
+.v-fade {
+  display: block !important; /* override v-show display: none */
+  transition: opacity 0.5s;
+}
 
-  .fade-enter-to, .fade-leave {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .fade-leave-to {
-    opacity: 0;
-  }
-
-  .v-fade {
-    display: block !important; /* override v-show display: none */
-    transition: opacity 0.5s;
-  }
-
-  .v-fade[style*="display: none;"] {
-    opacity: 0;
-    pointer-events: none; /* disable user interaction */
-    user-select: none; /* disable user selection */
-  }
+.v-fade[style*="display: none;"] {
+  opacity: 0;
+  pointer-events: none; /* disable user interaction */
+  user-select: none; /* disable user selection */
+}
 </style>

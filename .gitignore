@@ -1,3 +1,4 @@
+.env
 .idea
 .vscode
 .DS_Store
@@ -17,7 +18,3 @@ test/e2e/cypress/plugins/
 test/e2e/cypress/support/
 test/e2e/cypress/videos/
 test/e2e/node_modules/
-
-.gitlab-ci.yml
-docker-compose.yml
-docker-compose-cloud.override.yml

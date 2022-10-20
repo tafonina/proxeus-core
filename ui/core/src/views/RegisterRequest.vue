@@ -73,7 +73,7 @@ export default {
     }
   },
   created () {
-    if (window.web3 !== undefined) {
+    if (typeof window.ethereum !== 'undefined') {
       this.metamaskLoginAvailable = true
     }
   },
@@ -117,10 +117,10 @@ export default {
       this.metamaskLogin()
     },
     checkTermsAndConditions () {
-      if (this.$t('Terms & Conditions link', '') == 'Terms & Conditions link') {
+      if (this.$t('Terms & Conditions link', '') === 'Terms & Conditions link') {
         return true
       }
-      let rememberAccept = localStorage.getItem('acc_' + this.account)
+      const rememberAccept = localStorage.getItem('acc_' + this.account)
       if (rememberAccept && rememberAccept === 'yes') {
         return true
       }
@@ -128,7 +128,7 @@ export default {
     },
     loginWithSignature () {
       if (!this.challenge) {
-        if (window.web3 !== undefined) {
+        if (typeof window.ethereum !== 'undefined') {
           this.metamaskLoginAvailable = true
           axios.get('/api/challenge').then((response) => {
             this.challenge = response.data

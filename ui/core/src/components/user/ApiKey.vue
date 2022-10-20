@@ -4,7 +4,7 @@
         <div v-show="createNew">
             <form ref="form" v-on:submit.prevent="createNewApiKey">
                 <animated-input :max="80" :label="$t('Name')" v-model="newName"/>
-                <span class="text-muted" style="white-space: normal;">{{$t('Create a API key')}}</span>
+                <span class="text-muted" style="white-space: normal;">{{$t('Create API key')}}</span>
                 <button type="button" style="position: absolute;right: 0;top: -3px;" @click="createNewApiKey" :disabled="!newName" class="btn btn-primary">
                     Save
                 </button>
@@ -27,7 +27,7 @@
             <span style="margin-right: 10px;">{{result.Name}}</span>
             <span style="font-weight: bold;">{{result.Key}}</span>
             <p>
-                <span class="text-muted" style="white-space: normal;">{{$t('Please copy this API key now as it will be not fully readable afterwards.')}}</span>
+                <span class="text-muted" style="white-space: normal;">{{$t('Please copy this API key now, as it will not be shown again.')}}</span>
             </p>
         </div>
     </div>
@@ -40,9 +40,6 @@
               <tr v-for="item in user.apiKeys" >
                   <td style="text-align: left;">
                       <span>{{item.Name}}</span>
-                  </td>
-                  <td style="text-align: left;">
-                      <span>{{item.Key}}</span>
                   </td>
                   <td v-if="app.me && (app.me.role >= 100 || app.me.id === user.id)" style="text-align: right;padding-right: 10px;">
                       <button style="float:right;padding:2px;" :title="$t('Delete API key')" type="button" @click="deleteApiKey(item.Key);" class="btn btn-danger btn-sm">
@@ -57,20 +54,20 @@
 
 <script>
 import AnimatedInput from '../AnimatedInput'
-import Checkbox from '../Checkbox'
+// import Checkbox from '../Checkbox'
 import mafdc from '@/mixinApp'
 
 export default {
   mixins: [mafdc],
   name: 'api-key',
   components: {
-    Checkbox,
+    // Checkbox,
     AnimatedInput
   },
   props: {
     user: {
       type: Object,
-      default: {}
+      default: () => {}
     }
   },
   data () {
@@ -97,11 +94,11 @@ export default {
       })
     },
     reloadKeys () {
-      let include = {}
+      const include = {}
       include[this.user.id] = true
       axios.post('/api/admin/user/list', { include: include, limit: 1 }).then(response => {
         if (response.data && response.data.length === 1 && response.data[0].id === this.user.id) {
-          let usr = response.data[0]
+          const usr = response.data[0]
           this.user.apiKeys = usr.apiKeys
         }
       }, (err) => {
@@ -117,7 +114,7 @@ export default {
         this.$notify({
           group: 'app',
           title: this.$t('Success'),
-          text: this.$t('The API-Key was successfully deleted.'),
+          text: this.$t('The API-Key was deleted.'),
           type: 'success'
         })
         this.reloadKeys()
@@ -126,7 +123,7 @@ export default {
         this.$notify({
           group: 'app',
           title: this.$t('Error'),
-          text: this.$t('Could not delete API-Key. Please try again or if the error persists contact the platform operator.'),
+          text: this.$t('Could not delete API-Key. Please try again or contact the platform operator.'),
           type: 'error'
         })
       })
@@ -136,7 +133,7 @@ export default {
         return
       }
       axios.get('/api/user/create/api/key/' + this.user.id + '?name=' + this.newName).then(response => {
-        this.result = { 'Name': this.newName, 'Key': response.data }
+        this.result = { Name: this.newName, Key: response.data }
         this.newName = ''
         this.createNew = false
         this.reloadKeys()

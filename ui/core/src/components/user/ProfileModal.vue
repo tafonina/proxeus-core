@@ -113,7 +113,7 @@ export default {
   methods: {
     async deleteAccount () {
       try {
-        let result = await axios.post('/api/user/delete')
+        const result = await axios.post('/api/user/delete')
         if (result.status === 200) {
           window.location.href = '/'
           return
@@ -125,7 +125,7 @@ export default {
     updateEthereumAddress () {
       this.walletErrorMessage = ''
       if (!this.challenge) {
-        if (window.web3 !== undefined) {
+        if (typeof window.ethereum !== 'undefined') {
           axios.get('/api/challenge').then((response) => {
             this.challenge = response.data
             this.metamaskLogin()

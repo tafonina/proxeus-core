@@ -5,11 +5,11 @@ class MetamaskWallet {
   }
 
   async setupDefaultAccount () {
-    this.web3.eth.defaultAccount = (await this.web3.eth.getAccounts())[0]
+    this.web3.eth.defaultAccount = (await this.web3.eth.requestAccounts())[0]
   }
 
   async signMessage (message) {
-    let address = this.getCurrentAddress()
+    const address = this.getCurrentAddress()
     return this.web3.eth.personal.sign(message, address)
   }
 

@@ -35,7 +35,7 @@ variables:
 
 Common:Env:
   stage: init
-  image: core.s-pro.io/devops-images/dd-container:${DD_CONTAINER_TAG}
+  image: 907208926079.dkr.ecr.us-east-1.amazonaws.com/devops-images/prod/dd-container:1.0.0
   interruptible: true
   rules:
     - if: '$CI_COMMIT_BRANCH == $DEV_BRANCH'

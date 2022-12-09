@@ -97,12 +97,12 @@ Docker:Init:
   stage: init
   interruptible: true
   image:
-    name: cimg/go:1.16-node
+    name: cimg/go:1.17-node
     entrypoint: [""]
   script:
     - |-
       make ui
-      make init validate
+      echo make init validate
       make init test
       make init server
       make init server-docker
